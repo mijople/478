@@ -1,0 +1,1417 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>4-7-8 호흡</title>
+<meta name="description" content="뭉게구름이 흐르는 가을 하늘 아래, 큰 구체를 보며 4초 들이마시고 7초 머물고 8초 내쉬는 4-7-8 호흡을 따라 해보세요.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://videos.pexels.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400&family=Gowun+Batang&family=Gowun+Dodum&display=swap" rel="stylesheet">
+<style>
+  @property --c1 { syntax: '<color>'; inherits: true; initial-value: #f6f3ee; }
+  @property --c2 { syntax: '<color>'; inherits: true; initial-value: #d3d9de; }
+
+  :root {
+    --sky-top: #3b6ea8;
+    --sky-bottom: #cddcea;
+    --text-sky: #ffffff;
+    --text-orb: #3a4955;
+    --muted-orb: #66737e;
+    --btn-bg: rgba(255, 255, 255, .55);
+    --btn-bg-hover: rgba(255, 255, 255, .72);
+    --btn-border: rgba(255, 255, 255, .5);
+    --btn-ink: #34434f;
+    --primary-bg: rgba(255, 255, 255, .84);
+    --panel: rgba(250, 251, 252, .84);
+    --ink: #34434f;
+    --ink-soft: #6a7884;
+
+    /* 차분한 가을 파스텔 */
+    --ready-1: #f6f3ee;  --ready-2: #d3d9de;   /* 진주빛 */
+    --inhale-1: #e6f0f4; --inhale-2: #afc7d4;  /* 맑은 하늘빛 */
+    --hold-1: #f6ecdf;   --hold-2: #dec5a2;    /* 볕 든 모래빛 */
+    --exhale-1: #e7eee4; --exhale-2: #b2c2ad;  /* 마른 세이지 */
+
+    --font: 'Gowun Dodum', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+    --font-num: 'Quicksand', 'Gowun Dodum', system-ui, sans-serif;
+    --font-cue: 'Gowun Batang', serif;
+    --soft: cubic-bezier(.37, 0, .2, 1);   /* 전체 공통의 느긋한 곡선 */
+  }
+
+  /* ---------- 블랙 모드: 구름은 사라지고 구체는 흰빛으로 ---------- */
+  :root[data-mode="black"] {
+    --text-orb: #3d464e;
+    --muted-orb: #7a838b;
+    --btn-bg: rgba(255, 255, 255, .07);
+    --btn-bg-hover: rgba(255, 255, 255, .14);
+    --btn-border: rgba(255, 255, 255, .16);
+    --btn-ink: #e6eaee;
+    --primary-bg: rgba(255, 255, 255, .88);
+    --ready-1: #ffffff;  --ready-2: #e4e8ec;
+    --inhale-1: #ffffff; --inhale-2: #e3e9ee;
+    --hold-1: #ffffff;   --hold-2: #ebe7e1;
+    --exhale-1: #ffffff; --exhale-2: #e4e9e4;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    --c1: var(--ready-1);
+    --c2: var(--ready-2);
+    transition: --c1 4s var(--soft), --c2 4s var(--soft), background-color 2.5s var(--soft);
+    font-family: var(--font);
+    color: var(--text-sky);
+    background: linear-gradient(to bottom, var(--sky-top), var(--sky-bottom));
+    background-color: var(--sky-top);
+    min-height: 100svh;
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body[data-phase="inhale"] { --c1: var(--inhale-1); --c2: var(--inhale-2); }
+  body[data-phase="hold"]   { --c1: var(--hold-1);   --c2: var(--hold-2); }
+  body[data-phase="exhale"] { --c1: var(--exhale-1); --c2: var(--exhale-2); }
+
+  /* ---------- 하늘 배경: 실제 구름 타임랩스 영상 ---------- */
+  .photo, .sky-vid, .veil, .night { position: fixed; inset: 0; z-index: 0; }
+  .photo {
+    inset: -4%;
+    background-position: center;
+    background-size: cover;
+    filter: saturate(.8) brightness(1.04) contrast(.95) blur(14px);
+  }
+  .sky-vid {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 3.5s var(--soft);
+    filter: saturate(.82) brightness(1.04) contrast(.95);
+    pointer-events: none;
+  }
+  .sky-vid.on { opacity: 1; }
+  .veil {
+    z-index: 2;            /* 영상(교차 재생 중 z-index 1)보다 위 */
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse at 88% 0%, rgba(255, 224, 180, .2), rgba(255, 224, 180, 0) 45%),
+      radial-gradient(ellipse at 50% 46%, rgba(255,255,255,.08), rgba(0,0,0,0) 60%),
+      linear-gradient(to bottom, rgba(25, 50, 85, .14), rgba(25, 50, 85, 0) 22%, rgba(25, 50, 85, 0) 66%, rgba(25, 50, 85, .3));
+  }
+  /* 블랙 모드의 밤 — 구름 위로 천천히 내려앉음 */
+  .night {
+    z-index: 2;
+    pointer-events: none;
+    background: radial-gradient(ellipse at 50% 46%, #16191d 0%, #0a0b0d 55%, #050506 100%);
+    opacity: 0;
+    transition: opacity 2.5s var(--soft);
+  }
+  :root[data-mode="black"] .night { opacity: 1; }
+
+  .credit {
+    position: fixed;
+    right: 12px; bottom: 8px;
+    z-index: 4;
+    font-size: 11px;
+    color: rgba(255,255,255,.7);
+    text-decoration: none;
+    text-shadow: 0 1px 4px rgba(0,0,0,.3);
+    transition: opacity 2s;
+  }
+  .credit:hover { color: #fff; }
+  :root[data-mode="black"] .credit { opacity: 0; pointer-events: none; }
+
+  /* ---------- 오른쪽 위: 하늘 고르기 · 블랙 모드 ---------- */
+  .topbar {
+    position: fixed;
+    top: max(14px, env(safe-area-inset-top));
+    right: 14px;
+    z-index: 6;
+    display: flex;
+    gap: 8px;
+  }
+  .topbar button { padding: 8px 14px; font-size: 13.5px; }
+  .theme-btn .dot {
+    display: inline-block;
+    width: 9px; height: 9px;
+    margin-right: 7px;
+    border-radius: 50%;
+    background: #1c2025;
+    box-shadow: 0 0 0 1.5px rgba(255,255,255,.7);
+    vertical-align: 0;
+    transition: background 1.5s var(--soft);
+  }
+  :root[data-mode="black"] .theme-btn .dot { background: #fff; }
+  :root[data-mode="black"] #skyBtn { opacity: .35; pointer-events: none; }
+
+  .sky-panel {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: min(440px, calc(100vw - 28px));
+    padding: 16px;
+    border-radius: 20px;
+    background: var(--panel);
+    border: 1px solid rgba(255,255,255,.7);
+    box-shadow: 0 12px 40px rgba(30, 50, 75, .22);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    color: var(--ink);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px);
+    transition: opacity .7s var(--soft), transform .7s var(--soft), visibility 0s .7s;
+  }
+  .sky-panel.open { opacity: 1; visibility: visible; transform: none; transition: opacity .7s var(--soft), transform .7s var(--soft); }
+  .sky-panel h2 { margin: 0 0 12px; font-size: 14px; font-weight: 400; color: var(--ink-soft); }
+  .sky-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .sky-opt {
+    padding: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #cfd9e2;
+    border: 2px solid transparent;
+    text-align: left;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .sky-opt:hover { background: #cfd9e2; border-color: rgba(52, 67, 79, .25); }
+  .sky-opt[aria-pressed="true"] { border-color: #fff; box-shadow: 0 0 0 2px #7f97a8; }
+  .sky-opt video { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: #b9c9d6; }
+  .sky-opt span { display: block; padding: 7px 10px 8px; font-size: 13px; background: rgba(255,255,255,.85); color: var(--ink); }
+
+  .page {
+    position: relative;
+    z-index: 3;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: max(16px, env(safe-area-inset-top)) 16px max(22px, env(safe-area-inset-bottom));
+    gap: 14px;
+    text-shadow: 0 1px 12px rgba(30, 50, 75, .35);
+  }
+  header { text-align: center; }
+  header h1 {
+    margin: 8px 0 4px;
+    font-family: var(--font-num);
+    font-size: clamp(20px, 2.6vw, 26px);
+    font-weight: 400;
+    letter-spacing: .26em;
+  }
+  header p { margin: 0; opacity: .9; font-size: 15px; letter-spacing: .02em; }
+
+  /* ---------- 구체 ---------- */
+  .stage {
+    --size: min(90vw, 70svh, 680px);
+    position: relative;
+    width: var(--size);
+    height: var(--size);
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+  }
+  #wave {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 100vw;
+    height: 240px;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+  .ring {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    transform: rotate(-90deg);
+    overflow: visible;
+  }
+  .ring circle { fill: none; stroke-width: .5; stroke-linecap: round; }
+  .ring .seg { stroke: rgba(255, 255, 255, .26); transition: stroke 3s var(--soft), stroke-width 3s var(--soft); }
+  .ring .seg.active { stroke: rgba(255, 255, 255, .58); stroke-width: .8; }
+
+  .comet {
+    --a: 0deg;
+    position: absolute;
+    inset: 1%;
+    border-radius: 50%;
+    background: conic-gradient(from calc(var(--a) - 70deg),
+      rgba(255,255,255,0) 0deg,
+      rgba(255,255,255,.25) 35deg,
+      rgba(255,255,255,.95) 70deg,
+      rgba(255,255,255,0) 70.5deg);
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2.5px), #000 calc(100% - .5px), transparent 100%);
+            mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2.5px), #000 calc(100% - .5px), transparent 100%);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .head {
+    --a: 0deg;
+    position: absolute;
+    inset: 1%;
+    transform: rotate(var(--a));
+    pointer-events: none;
+    opacity: 0;
+  }
+  .head::after {
+    content: '';
+    position: absolute;
+    left: 50%; top: 0;
+    width: 12px; height: 12px;
+    margin: -6px 0 0 -6px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #fff 0 35%, rgba(255,255,255,.55) 50%, rgba(255,255,255,0) 72%);
+    box-shadow: 0 0 14px 4px rgba(255, 248, 235, .55);
+  }
+
+  .orb-wrap {
+    position: absolute;
+    width: 86%;
+    height: 86%;
+    display: grid;
+    place-items: center;
+  }
+  .orb, .aura, .halo {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    will-change: transform;
+  }
+  .aura {
+    background: radial-gradient(circle, color-mix(in srgb, var(--c1) 40%, transparent) 40%, transparent 70%);
+    filter: blur(calc(var(--size) * .02));
+  }
+  .aura.a2 { background: radial-gradient(circle, transparent 48%, rgba(255,255,255,.16) 62%, transparent 72%); }
+  .orb {
+    background:
+      radial-gradient(circle at 36% 30%, rgba(255,255,255,.7), rgba(255,255,255,0) 38%),
+      radial-gradient(circle at 50% 55%,
+        color-mix(in srgb, var(--c1) 86%, transparent) 0%,
+        color-mix(in srgb, var(--c2) 76%, transparent) 82%,
+        color-mix(in srgb, var(--c2) 88%, #6f7f8c 12%) 100%);
+    border: 1px solid rgba(255, 255, 255, .45);
+    box-shadow:
+      0 0 calc(var(--size) * .1) color-mix(in srgb, var(--c1) 55%, transparent),
+      0 calc(var(--size) * .03) calc(var(--size) * .12) rgba(40, 60, 85, .16),
+      inset 0 calc(var(--size) * -.04) calc(var(--size) * .1) color-mix(in srgb, var(--c2) 70%, transparent),
+      inset 0 calc(var(--size) * .02) calc(var(--size) * .05) rgba(255,255,255,.5);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  :root[data-mode="black"] .orb {
+    box-shadow:
+      0 0 calc(var(--size) * .12) rgba(255, 255, 255, .28),
+      0 0 calc(var(--size) * .3) rgba(255, 255, 255, .08),
+      inset 0 calc(var(--size) * -.04) calc(var(--size) * .1) color-mix(in srgb, var(--c2) 80%, transparent),
+      inset 0 calc(var(--size) * .02) calc(var(--size) * .05) rgba(255,255,255,.6);
+  }
+  .halo {
+    background: radial-gradient(circle, transparent 60%, rgba(255, 250, 240, .4) 68%, transparent 76%);
+    opacity: 0;
+    transition: opacity 4s var(--soft);
+  }
+  body[data-phase="hold"] .halo { opacity: 1; }
+
+  /* ---------- 구체 안: 단계(작게) · 초 막대(작게) · 코칭 문장(크게) ---------- */
+  .readout {
+    position: relative;
+    z-index: 2;
+    width: calc(var(--size) * .5);
+    text-align: center;
+    color: var(--text-orb);
+    text-shadow: 0 1px 8px rgba(255,255,255,.5);
+    pointer-events: none;
+    user-select: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  /* 모든 줄의 높이를 고정 → 단계·회차가 바뀌어도 글과 막대의 자리가 움직이지 않음 */
+  .readout > * {
+    flex: none;
+    transition: opacity 1.6s var(--soft), filter 1.6s var(--soft);
+  }
+  /* 단계가 바뀔 때: 제자리에서 천천히 흐려졌다가 다시 또렷해짐 (위치 이동 없음) */
+  .readout.out > :not(.ticks) { opacity: 0; filter: blur(5px); transition-duration: 1s; transition-delay: 0s; }
+  .readout.pre > :not(.ticks) { opacity: 0; filter: blur(5px); transition: none; }
+  .readout > .cue { transition-delay: .3s; }
+
+  .title {
+    height: 1.7em;
+    line-height: 1.7em;
+    white-space: nowrap;
+    font-size: max(12px, calc(var(--size) * .025));
+    letter-spacing: .22em;
+    color: var(--muted-orb);
+  }
+  .title .tag { letter-spacing: .06em; opacity: .8; }
+
+  /* 초 점: 단계의 초 수만큼 희미한 자리(4·7·8)가 있고,
+     1초마다 다음 자리에 굵은 점이 떠오르고 앞의 점은 천천히 사라짐 */
+  .ticks {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: max(10px, calc(var(--size) * .018));
+    height: max(32px, calc(var(--size) * .058));   /* 높이 고정 → 위치 흔들림 없음 */
+    margin: calc(var(--size) * .016) 0 calc(var(--size) * .022);
+    transition: opacity 2s var(--soft);
+  }
+  .dot {
+    position: relative;
+    width: max(8px, calc(var(--size) * .014));
+    aspect-ratio: 1;
+    animation: slotIn 1.2s var(--soft);
+  }
+  .dot::before {                   /* 아직 오지 않은 초의 희미한 자리 */
+    content: '';
+    position: absolute;
+    inset: 32%;
+    border-radius: 50%;
+    background: rgba(70, 82, 92, .22);
+  }
+  .dot::after {                    /* 지금 이 초의 굵은 점 */
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: #55616b;
+    opacity: 0;
+    transform: scale(.4);
+  }
+  /* 번쩍 나타났다가 곧바로 흐려지며 길게 사라짐 — 1초 너머까지 여운이 남아 시간이 느긋하게 느껴지도록 */
+  .dot.on::after, .dot.off::after { animation: flash 2.4s cubic-bezier(.2, .7, .3, 1) forwards; }
+  @keyframes flash {
+    0%   { opacity: 0;   transform: scale(.5);  box-shadow: 0 0 0 0 rgba(85, 97, 107, 0); }
+    8%   { opacity: .95; transform: scale(1.15); box-shadow: 0 0 12px 3px rgba(85, 97, 107, .28); }
+    30%  { opacity: .45; transform: scale(1);   box-shadow: 0 0 8px 1px rgba(85, 97, 107, .12); }
+    100% { opacity: 0;   transform: scale(.8);  box-shadow: 0 0 0 0 rgba(85, 97, 107, 0); }
+  }
+  @keyframes slotIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .cue {
+    height: 3.2em;                 /* 두 줄 높이로 고정, 첫 줄 위치 고정 */
+    font-family: var(--font-cue);
+    font-size: max(16px, calc(var(--size) * .04));
+    line-height: 1.6;
+    letter-spacing: .01em;
+    color: var(--ink);
+    word-break: keep-all;
+  }
+  .idle .ticks { opacity: 0; }
+
+  /* ---------- 컨트롤 ---------- */
+  .controls {
+    position: relative;
+    display: flex; flex-wrap: wrap;
+    align-items: center; justify-content: center;
+    gap: 10px;
+    text-shadow: none;
+  }
+  button, select {
+    font: inherit;
+    color: var(--btn-ink);
+    background: var(--btn-bg);
+    border: 1px solid var(--btn-border);
+    border-radius: 999px;
+    padding: 10px 18px;
+    font-size: 15px;
+    cursor: pointer;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition: background .8s var(--soft), color 1.5s var(--soft), border-color 1.5s var(--soft), opacity 1.5s var(--soft);
+  }
+  select option { color: #34434f; }
+  button:hover, select:hover { background: var(--btn-bg-hover); }
+  button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+  .primary {
+    background: var(--primary-bg);
+    color: var(--ink);
+    min-width: 128px;
+    padding: 12px 28px;
+    font-size: 16px;
+  }
+  .primary:hover { background: #fff; }
+  .cycle-info {
+    color: var(--text-sky);
+    text-shadow: 0 1px 8px rgba(30, 50, 75, .4);
+    font-size: 14px;
+    min-width: 64px;
+    text-align: center;
+  }
+
+  .sound-panel {
+    position: absolute;
+    bottom: calc(100% + 12px);
+    left: 50%;
+    width: min(400px, calc(100vw - 32px));
+    transform: translate(-50%, 6px);
+    padding: 16px 16px 14px;
+    border-radius: 20px;
+    background: var(--panel);
+    border: 1px solid rgba(255,255,255,.7);
+    box-shadow: 0 12px 40px rgba(30, 50, 75, .22);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    color: var(--ink);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .7s var(--soft), transform .7s var(--soft), visibility 0s .7s;
+    z-index: 5;
+  }
+  .sound-panel.open {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, 0);
+    transition: opacity .7s var(--soft), transform .7s var(--soft);
+  }
+  .sound-panel h2 { margin: 0 0 10px; font-size: 14px; font-weight: 400; color: var(--ink-soft); letter-spacing: .04em; }
+  .group { margin: 12px 0 6px; font-size: 12px; color: var(--ink-soft); letter-spacing: .08em; }
+  .group:first-of-type { margin-top: 0; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    padding: 7px 13px;
+    font-size: 14px;
+    background: transparent;
+    border: 1px solid rgba(52, 67, 79, .22);
+    color: var(--ink-soft);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .chip:hover { background: rgba(255,255,255,.6); }
+  .chip[aria-pressed="true"] {
+    background: #fff;
+    border-color: #fff;
+    color: var(--ink);
+    box-shadow: 0 2px 10px rgba(30, 50, 75, .12);
+  }
+  .row { display: flex; align-items: center; gap: 12px; margin-top: 14px; font-size: 14px; color: var(--ink-soft); }
+  .row input[type="range"] { flex: 1; accent-color: #7f97a8; cursor: pointer; }
+  .row .chip { margin-left: auto; }
+
+  .hint { font-size: 12.5px; text-align: center; opacity: .85; }
+
+  @media (max-width: 640px) { header { margin-top: 40px; } }
+  @media (max-height: 700px) { header p, .hint { display: none; } }
+</style>
+</head>
+<body data-phase="ready">
+<div class="photo" id="photo" aria-hidden="true"></div>
+<video class="sky-vid" id="vidA" muted playsinline preload="auto" aria-hidden="true"></video>
+<video class="sky-vid" id="vidB" muted playsinline preload="auto" aria-hidden="true"></video>
+<div class="veil" aria-hidden="true"></div>
+<div class="night" aria-hidden="true"></div>
+
+<div class="topbar">
+  <button id="skyBtn" aria-expanded="false" aria-controls="skyPanel">하늘 고르기</button>
+  <button id="themeBtn" class="theme-btn" aria-pressed="false"><span class="dot"></span>블랙 모드</button>
+  <div class="sky-panel" id="skyPanel" role="dialog" aria-label="하늘 영상 고르기">
+    <h2>마음에 드는 하늘을 골라 보세요</h2>
+    <div class="sky-grid" id="skyGrid"></div>
+  </div>
+</div>
+
+<div class="page">
+  <header>
+    <h1>4 · 7 · 8</h1>
+    <p>구체가 커지면 들이마시고, 머물면 참고, 작아지면 내쉬어요</p>
+  </header>
+
+  <div class="stage">
+    <canvas id="wave" aria-hidden="true"></canvas>
+    <svg class="ring" viewBox="0 0 100 100" aria-hidden="true">
+      <circle class="seg" data-seg="inhale" cx="50" cy="50" r="49"></circle>
+      <circle class="seg" data-seg="hold"   cx="50" cy="50" r="49"></circle>
+      <circle class="seg" data-seg="exhale" cx="50" cy="50" r="49"></circle>
+    </svg>
+    <div class="comet" id="comet"></div>
+    <div class="head" id="head"></div>
+    <div class="orb-wrap">
+      <div class="aura" id="aura1"></div>
+      <div class="aura a2" id="aura2"></div>
+      <div class="halo" id="halo"></div>
+      <div class="orb" id="orb"></div>
+      <div class="readout idle" id="readout" aria-live="polite">
+        <div class="title" id="title">시작을 누르면 천천히 시작해요</div>
+        <div class="ticks" id="ticks" aria-hidden="true"></div>
+        <div class="cue" id="cue">잠시, 모든 일을 내려놓아도 괜찮아요</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <select id="cycles" aria-label="반복 횟수">
+      <option value="4" selected>4회 반복</option>
+      <option value="8">8회 반복</option>
+      <option value="0">계속 반복</option>
+    </select>
+    <button class="primary" id="toggle">시작</button>
+    <button id="reset">처음으로</button>
+    <button id="soundBtn" aria-expanded="false" aria-controls="soundPanel">자연의 소리</button>
+    <span class="cycle-info" id="cycleInfo">0 / 4 회</span>
+
+    <div class="sound-panel" id="soundPanel" role="dialog" aria-label="자연의 소리 고르기">
+      <h2>듣고 싶은 소리를 골라 섞어 보세요</h2>
+      <div class="group">숲과 물</div>
+      <div class="chips">
+        <button class="chip" data-layer="wind" aria-pressed="true">바람</button>
+        <button class="chip" data-layer="stream" aria-pressed="true">시냇물</button>
+        <button class="chip" data-layer="waves" aria-pressed="false">잔잔한 파도</button>
+        <button class="chip" data-layer="rain" aria-pressed="false">가랑비</button>
+        <button class="chip" data-layer="leaves" aria-pressed="false">낙엽 바스락</button>
+      </div>
+      <div class="group">생명과 온기</div>
+      <div class="chips">
+        <button class="chip" data-layer="birds" aria-pressed="false">먼 새소리</button>
+        <button class="chip" data-layer="crickets" aria-pressed="false">풀벌레</button>
+        <button class="chip" data-layer="fire" aria-pressed="false">모닥불</button>
+      </div>
+      <div class="group">명상의 울림</div>
+      <div class="chips">
+        <button class="chip" data-layer="chimes" aria-pressed="false">처마 끝 풍경</button>
+        <button class="chip" data-layer="bowl" aria-pressed="false">싱잉볼</button>
+      </div>
+      <div class="row">
+        <span>크기</span>
+        <input type="range" id="vol" min="0" max="100" value="60" aria-label="자연의 소리 크기">
+      </div>
+      <div class="row">
+        <span>단계가 바뀔 때 종소리</span>
+        <button class="chip" id="chimeChip" aria-pressed="false">꺼짐</button>
+      </div>
+    </div>
+  </div>
+  <div class="hint">스페이스바로 시작하고 멈출 수 있어요 · 처음엔 4회 이내로 연습해 보세요</div>
+</div>
+<a class="credit" id="credit" href="https://www.pexels.com/video/10452770/" target="_blank" rel="noopener">Video · Pexels</a>
+
+<script>
+/* ---------- 저장(가능할 때만) ---------- */
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
+};
+
+/* ---------- 하늘: 구름 타임랩스 영상 (끊김 없는 반복 + 고르기) ---------- */
+window.Sky = (() => {
+  const SKIES = [
+    { id: '10452770', fps: 30, name: '뭉게구름 띠' },
+    { id: '7806519',  fps: 30, name: '포근한 큰 구름' },
+    { id: '9169371',  fps: 30, name: '흩어진 솜구름' },
+    { id: '11868811', fps: 30, name: '부드러운 구름결' },
+    { id: '10764048', fps: 30, name: '맑은 하늘 조각구름' },
+    { id: '9554915',  fps: 25, name: '지평선 위 구름' },
+    { id: '8037232',  fps: 30, name: '짙은 뭉게구름' },
+  ];
+  const RATE = 0.35;    // 원본의 35% 속도(이전의 절반) → 아주 느긋한 흐름
+  const FADE = 3.5;     // 끝과 처음(또는 다른 하늘)을 겹치는 시간
+  const PHOTO = 'https://images.unsplash.com/photo-1599209248411-5124adbb1da2?fm=jpg&fit=max&auto=format&q=40&w=640';
+
+  document.getElementById('photo').style.backgroundImage = `url("${PHOTO}")`;
+
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const need = Math.max(innerWidth || screen.width, (innerHeight || screen.height) * 16 / 9) * dpr;
+  const res = need > 2600 ? 'uhd_3840_2160' : need > 1950 ? 'uhd_2560_1440' : 'hd_1920_1080';
+  const urlOf = s => `https://videos.pexels.com/video-files/${s.id}/${s.id}-${res}_${s.fps}fps.mp4`;
+  const thumbOf = s => `https://videos.pexels.com/video-files/${s.id}/${s.id}-sd_640_360_${s.fps}fps.mp4#t=12`;
+
+  const vids = [document.getElementById('vidA'), document.getElementById('vidB')];
+  const credit = document.getElementById('credit');
+  let cur = 0, crossing = false, paused = false;
+  let sky = SKIES.find(s => s.id === store.get('breath-sky')) || SKIES[0];
+
+  function play(v) {
+    v.playbackRate = RATE;
+    const p = v.play();
+    if (p && p.catch) p.catch(() => {});
+  }
+  function fade(next, nextSrc) {
+    const a = vids[cur], b = vids[1 - cur];
+    crossing = true;
+    const go = () => {
+      b.currentTime = 0;
+      b.style.zIndex = 1; a.style.zIndex = 0;
+      play(b);
+      b.classList.add('on');
+      setTimeout(() => {
+        a.classList.remove('on');
+        a.pause();
+        if (a.getAttribute('src') !== nextSrc) { a.src = nextSrc; a.load(); }
+        cur = 1 - cur;
+        crossing = false;
+      }, FADE * 1000 + 300);
+    };
+    if (b.getAttribute('src') !== nextSrc) {
+      b.src = nextSrc; b.load();
+      b.addEventListener('canplay', go, { once: true });
+    } else go();
+  }
+
+  vids.forEach((v, i) => {
+    v.muted = true;
+    v.defaultPlaybackRate = RATE;
+    v.addEventListener('ended', () => { if (i === cur && !crossing) fade(null, urlOf(sky)); });
+  });
+  vids[0].src = urlOf(sky);
+  // 두 번째 영상은 첫 영상이 재생되고 나서 천천히 준비 (중복 다운로드 방지)
+  vids[0].addEventListener('playing', () => setTimeout(() => {
+    if (!vids[1].getAttribute('src')) { vids[1].src = urlOf(sky); vids[1].load(); }
+  }, 6000), { once: true });
+  credit.href = `https://www.pexels.com/video/${sky.id}/`;
+
+  // 끝나기 직전에 처음과 겹쳐서 이음새 없이 반복
+  setInterval(() => {
+    const v = vids[cur];
+    if (paused || crossing || !v.duration || v.paused) return;
+    if ((v.duration - v.currentTime) / RATE <= FADE + 0.3) fade(null, urlOf(sky));
+  }, 200);
+
+  vids[0].addEventListener('playing', () => vids[0].classList.add('on'), { once: true });
+  vids[0].addEventListener('canplay', () => { if (!paused && !crossing && cur === 0 && vids[0].paused) play(vids[0]); });
+  play(vids[0]);
+  const resume = () => { if (!paused && vids[cur].paused) play(vids[cur]); };
+  document.addEventListener('click', resume);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) resume(); });
+
+  return {
+    list: SKIES,
+    thumbOf,
+    get current() { return sky.id; },
+    choose(id) {
+      const s = SKIES.find(x => x.id === id);
+      if (!s || s.id === sky.id) return;
+      sky = s;
+      store.set('breath-sky', id);
+      credit.href = `https://www.pexels.com/video/${s.id}/`;
+      if (crossing) setTimeout(() => this.choose(id), 800);
+      else fade(null, urlOf(sky));
+    },
+    pause() { paused = true; setTimeout(() => { if (paused) vids.forEach(v => v.pause()); }, 2600); },
+    resume() { paused = false; play(vids[cur]); },
+  };
+})();
+
+/* ---------- 오디오 공용 ---------- */
+window.getAudio = () => {
+  if (!window.__ac) window.__ac = new (window.AudioContext || window.webkitAudioContext)();
+  if (window.__ac.state === 'suspended') window.__ac.resume();
+  return window.__ac;
+};
+
+/* ---------- 자연의 소리 (모두 실시간 합성 — 반복 구간이 티 나지 않음) ---------- */
+window.Nature = (() => {
+  const L = {
+    wind: { on: true }, stream: { on: true }, waves: { on: false }, rain: { on: false }, leaves: { on: false },
+    birds: { on: false }, crickets: { on: false }, fire: { on: false },
+    chimes: { on: false }, bowl: { on: false },
+  };
+  let ctx, master, built = false, running = false, timers = [], volume = 0.6;
+  let white, stream, wavesNodes;
+  const rand = (a, b) => a + Math.random() * (b - a);
+  const later = (fn, s) => timers.push(setTimeout(fn, s * 1000));
+
+  function noiseBuffer(kind, secs = 8) {
+    const len = Math.floor(ctx.sampleRate * secs);
+    const buf = ctx.createBuffer(2, len, ctx.sampleRate);
+    for (let ch = 0; ch < 2; ch++) {
+      const d = buf.getChannelData(ch);
+      let last = 0, b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+      for (let i = 0; i < len; i++) {
+        const w = Math.random() * 2 - 1;
+        if (kind === 'brown') { last = (last + 0.02 * w) / 1.02; d[i] = last * 3.5; }
+        else if (kind === 'pink') {
+          b0 = 0.99886 * b0 + w * 0.0555179; b1 = 0.99332 * b1 + w * 0.0750759;
+          b2 = 0.96900 * b2 + w * 0.1538520; b3 = 0.86650 * b3 + w * 0.3104856;
+          b4 = 0.55000 * b4 + w * 0.5329522; b5 = -0.7616 * b5 - w * 0.0168980;
+          d[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * 0.5362) * 0.11;
+          b6 = w * 0.115926;
+        } else d[i] = w;
+      }
+      const drift = d[len - 1] - d[0];          // 반복 이음새의 '틱' 제거
+      for (let i = 0; i < len; i++) d[i] -= drift * i / (len - 1);
+    }
+    return buf;
+  }
+  function loopSrc(buf) {
+    const s = ctx.createBufferSource();
+    s.buffer = buf; s.loop = true;
+    s.start(0, rand(0, buf.duration));
+    return s;
+  }
+  function lfo(freq, depth, param) {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.frequency.value = freq; g.gain.value = depth;
+    o.connect(g).connect(param); o.start();
+  }
+  function filter(type, freq, q = 0.7) {
+    const f = ctx.createBiquadFilter();
+    f.type = type; f.frequency.value = freq; f.Q.value = q;
+    return f;
+  }
+  function gain(v) { const g = ctx.createGain(); g.gain.value = v; return g; }
+  function panner(v) { const p = ctx.createStereoPanner(); p.pan.value = v; return p; }
+  // 짧은 잡음 알갱이 (빗방울 · 장작 튀는 소리 · 낙엽)
+  function grain(t, dur, peak, hp, lp, pan, dest) {
+    const s = ctx.createBufferSource(); s.buffer = white;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(peak, t + Math.min(0.004, dur * 0.3));
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    s.connect(filter('highpass', hp)).connect(filter('lowpass', lp)).connect(g).connect(panner(pan)).connect(dest);
+    s.start(t, rand(0, 2)); s.stop(t + dur + 0.02);
+  }
+  // 금속성 울림 (풍경 · 싱잉볼)
+  function bell(t, f, partials, decay, peak, pan, dest) {
+    const p = panner(pan); p.connect(dest);
+    partials.forEach(([mult, amp, dmul]) => {
+      [1, 1.0025].forEach(det => {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.type = 'sine';
+        o.frequency.value = f * mult * det;
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(peak * amp * 0.5, t + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + decay * dmul);
+        o.connect(g).connect(p);
+        o.start(t); o.stop(t + decay * dmul + 0.05);
+      });
+    });
+  }
+
+  function build() {
+    ctx = getAudio();
+    const comp = ctx.createDynamicsCompressor();
+    comp.connect(ctx.destination);
+    master = gain(0);
+    master.connect(comp);
+    for (const k in L) {
+      L[k].g = gain(L[k].on ? 1 : 0);
+      L[k].g.connect(master);
+    }
+    const brown = noiseBuffer('brown'), pink = noiseBuffer('pink');
+    white = noiseBuffer('white', 3);
+
+    // 바람
+    const wLp = filter('lowpass', 420, 0.4), wG = gain(0.22);
+    loopSrc(brown).connect(wLp).connect(wG).connect(L.wind.g);
+    lfo(0.045, 180, wLp.frequency);
+    lfo(0.027, 0.1, wG.gain);
+    const gBp = filter('bandpass', 900, 0.9), gG = gain(0.14);
+    loopSrc(pink).connect(gBp).connect(gG).connect(L.wind.g);
+    lfo(0.07, 350, gBp.frequency);
+    lfo(0.04, 0.1, gG.gain);
+
+    // 시냇물
+    const sLp = filter('lowpass', 2600), sG = gain(0.35);
+    loopSrc(pink).connect(filter('highpass', 500)).connect(sLp).connect(sG).connect(panner(-0.35)).connect(L.stream.g);
+    stream = { g: sG, lp: sLp };
+
+    // 잔잔한 파도: 밀려왔다 물러가는 낮은 물결 + 하얀 포말
+    const swell = gain(0.05), foam = gain(0.02), foamLp = filter('lowpass', 3500);
+    loopSrc(brown).connect(filter('lowpass', 650)).connect(swell).connect(L.waves.g);
+    loopSrc(pink).connect(filter('highpass', 1200)).connect(foamLp).connect(foam).connect(L.waves.g);
+    wavesNodes = { swell, foam, foamLp };
+
+    // 가랑비: 고운 빗소리 바탕
+    const rG = gain(0.16);
+    loopSrc(pink).connect(filter('highpass', 900)).connect(filter('lowpass', 7000)).connect(rG).connect(L.rain.g);
+    lfo(0.05, 0.03, rG.gain);
+
+    // 모닥불: 낮게 타오르는 소리 바탕
+    const fG = gain(0.16);
+    loopSrc(brown).connect(filter('lowpass', 260)).connect(fG).connect(L.fire.g);
+    lfo(0.3, 0.05, fG.gain);
+    built = true;
+  }
+
+  function babble() {
+    if (!running) return;
+    stream.g.gain.setTargetAtTime(rand(0.22, 0.5), ctx.currentTime, 0.08);
+    stream.lp.frequency.setTargetAtTime(rand(1800, 3200), ctx.currentTime, 0.1);
+    later(babble, rand(0.09, 0.22));
+  }
+  function wave() {
+    if (!running) return;
+    const t = ctx.currentTime, len = rand(7, 11), peak = rand(0.35, 0.55);
+    const { swell, foam, foamLp } = wavesNodes;
+    swell.gain.cancelScheduledValues(t);
+    swell.gain.setTargetAtTime(peak, t, len * 0.18);
+    swell.gain.setTargetAtTime(0.06, t + len * 0.45, len * 0.2);
+    foam.gain.cancelScheduledValues(t);
+    foam.gain.setTargetAtTime(0.02, t, 0.5);
+    foam.gain.setTargetAtTime(peak * 0.32, t + len * 0.38, len * 0.08);
+    foam.gain.setTargetAtTime(0.015, t + len * 0.55, len * 0.18);
+    foamLp.frequency.setTargetAtTime(4500, t + len * 0.38, 0.6);
+    foamLp.frequency.setTargetAtTime(2200, t + len * 0.6, 1.2);
+    later(wave, len);
+  }
+  function rainDrops() {
+    if (!running) return;
+    if (L.rain.on) {
+      const t0 = ctx.currentTime + 0.05;
+      for (let i = 0; i < 14; i++) {
+        grain(t0 + rand(0, 1), rand(0.006, 0.02), rand(0.02, 0.08), rand(1800, 3200), rand(5000, 9000), rand(-0.9, 0.9), L.rain.g);
+      }
+    }
+    later(rainDrops, 1);
+  }
+  function fireCrackle() {
+    if (!running) return;
+    if (L.fire.on) {
+      const t0 = ctx.currentTime + 0.05, n = Math.floor(rand(2, 7));
+      for (let i = 0; i < n; i++) {
+        const big = Math.random() < 0.12;
+        grain(t0 + rand(0, 1), big ? rand(0.02, 0.05) : rand(0.003, 0.012),
+              big ? rand(0.12, 0.2) : rand(0.03, 0.09), big ? 700 : 1500, big ? 5000 : 8000, rand(-0.3, 0.3), L.fire.g);
+      }
+    }
+    later(fireCrackle, 1);
+  }
+  function rustle() {
+    if (!running) return;
+    if (L.leaves.on) {
+      const t = ctx.currentTime, dur = rand(1.8, 3.5);
+      const s = ctx.createBufferSource(); s.buffer = white; s.loop = true;
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(rand(0.04, 0.07), t + dur * 0.4);
+      g.gain.linearRampToValueAtTime(0, t + dur);
+      s.connect(filter('highpass', rand(2200, 3200))).connect(filter('lowpass', 7000)).connect(g).connect(panner(rand(-0.8, 0.8))).connect(L.leaves.g);
+      s.start(t, rand(0, 2)); s.stop(t + dur + 0.1);
+    }
+    later(rustle, rand(5, 13));
+  }
+  function bird() {
+    if (!running) return;
+    if (L.birds.on) {
+      const base = rand(2600, 3600), notes = Math.floor(rand(2, 5));
+      const lp = filter('lowpass', 5200); lp.connect(panner(rand(-0.9, 0.9))).connect(L.birds.g);
+      let t = ctx.currentTime + 0.05;
+      for (let i = 0; i < notes; i++) {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        const f = base * rand(0.92, 1.08), len = rand(0.07, 0.14);
+        o.type = 'sine';
+        o.frequency.setValueAtTime(f, t);
+        o.frequency.exponentialRampToValueAtTime(f * rand(1.15, 1.4), t + len * 0.6);
+        o.frequency.exponentialRampToValueAtTime(f * 0.95, t + len);
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(rand(0.02, 0.035), t + 0.015);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+        o.connect(g).connect(lp);
+        o.start(t); o.stop(t + len + 0.02);
+        t += len + rand(0.06, 0.18);
+      }
+    }
+    later(bird, rand(8, 22));
+  }
+  function crickets() {
+    if (!running) return;
+    if (L.crickets.on) {
+      const t0 = ctx.currentTime + 0.05, span = 3;
+      [{ f: 4300, pan: -0.55, every: 0.78 }, { f: 4750, pan: 0.6, every: 0.93 }].forEach(c => {
+        const o = ctx.createOscillator(), g = gain(0);
+        o.frequency.value = c.f * rand(0.985, 1.015);
+        o.connect(g).connect(panner(c.pan)).connect(L.crickets.g);
+        let t = t0 + rand(0, 0.4);
+        while (t < t0 + span) {
+          for (let k = 0; k < 3; k++) {
+            const s = t + k * 0.045;
+            g.gain.setValueAtTime(0, s);
+            g.gain.linearRampToValueAtTime(0.014, s + 0.008);
+            g.gain.linearRampToValueAtTime(0, s + 0.032);
+          }
+          t += c.every * rand(0.9, 1.1);
+        }
+        o.start(t0); o.stop(t0 + span + 0.4);
+      });
+    }
+    later(crickets, 3);
+  }
+  // 처마 끝 풍경: 바람에 가끔 울리는 맑은 소리 (오음계)
+  const PENTA = [1046.5, 1174.7, 1396.9, 1568, 1760, 2093];
+  function chimes() {
+    if (!running) return;
+    if (L.chimes.on) {
+      let t = ctx.currentTime + 0.05;
+      const n = Math.floor(rand(1, 4));
+      for (let i = 0; i < n; i++) {
+        bell(t, PENTA[Math.floor(Math.random() * PENTA.length)],
+             [[1, 1, 1], [2.76, 0.35, 0.6], [5.4, 0.12, 0.35]], rand(3.5, 5.5), rand(0.02, 0.035), rand(-0.6, 0.6), L.chimes.g);
+        t += rand(0.25, 0.9);
+      }
+    }
+    later(chimes, rand(5, 13));
+  }
+  // 싱잉볼: 길게 맴도는 낮은 울림
+  function bowl() {
+    if (!running) return;
+    if (L.bowl.on) {
+      bell(ctx.currentTime + 0.05, Math.random() < 0.5 ? 196 : 220,
+           [[1, 1, 1], [2.71, 0.45, 0.7], [5.15, 0.18, 0.45]], rand(10, 13), 0.06, rand(-0.2, 0.2), L.bowl.g);
+    }
+    later(bowl, rand(16, 26));
+  }
+
+  const anyOn = () => Object.values(L).some(l => l.on);
+
+  return {
+    start() {
+      if (running || !anyOn()) return;
+      if (!built) build(); else getAudio();
+      running = true;
+      master.gain.cancelScheduledValues(ctx.currentTime);
+      master.gain.setValueAtTime(master.gain.value, ctx.currentTime);
+      master.gain.linearRampToValueAtTime(volume, ctx.currentTime + 6); // 6초에 걸쳐 서서히
+      babble(); wave();
+      later(rainDrops, 0.3); later(fireCrackle, 0.5);
+      later(rustle, rand(1, 3)); later(bird, rand(2, 5)); later(crickets, 0.5);
+      later(chimes, rand(1, 3)); later(bowl, rand(1, 2));
+    },
+    stop() {
+      if (!running) return;
+      running = false;
+      timers.forEach(clearTimeout); timers = [];
+      master.gain.cancelScheduledValues(ctx.currentTime);
+      master.gain.setValueAtTime(master.gain.value, ctx.currentTime);
+      master.gain.linearRampToValueAtTime(0, ctx.currentTime + 3);
+    },
+    setLayer(name, on) {
+      L[name].on = on;
+      if (built) L[name].g.gain.setTargetAtTime(on ? 1 : 0, ctx.currentTime, 0.8);
+      if (anyOn()) this.start(); else this.stop();
+    },
+    setVolume(v) {
+      volume = v;
+      if (running) master.gain.setTargetAtTime(v, ctx.currentTime, 0.4);
+    },
+    count: () => Object.values(L).filter(l => l.on).length,
+  };
+})();
+
+/* ---------- 호흡 진행 ---------- */
+(() => {
+  const MIN = 0.64, MAX = 1.0, READY = 3;
+  const PHASES = [
+    { key: 'inhale', label: '들이마시기', tag: '코로',      dur: 4, tone: 349 },
+    { key: 'hold',   label: '머물기',     tag: '머금고',    dur: 7, tone: 392 },
+    { key: 'exhale', label: '내쉬기',     tag: "입으로 후—", dur: 8, tone: 294 },
+  ];
+  // 회차마다 바뀌는 코칭 문장 [들이마시기, 머물기, 내쉬기] — 이 문장 하나만 읽도록
+  const CUES = [
+    ['천천히, 숨이 들어오는 걸 느껴요',      '지금 이 자리에 머물러요',              '어깨의 힘을 툭, 내려놓아요'],
+    ['맑은 가을 공기가 가슴을 채워요',       '떠오르는 생각은 구름처럼 바라만 봐요',  '그 생각을 구름에 실어 흘려보내요'],
+    ['새로운 숨이 조용히 들어와요',          '아무것도 하지 않아도 괜찮아요',        '이마와 턱의 긴장을 풀어요'],
+    ['따뜻한 햇살을 들이마시듯',             '마음이 하늘처럼 넓어져요',             '오늘의 무게를 천천히 내려놓아요'],
+    ['숨이 배 깊숙이 닿아요',                '고요함 속에서 잠시 쉬어요',            '남아 있던 걱정도 함께 내보내요'],
+    ['지금 이 순간을 들이마셔요',            '나는 지금 충분히 괜찮아요',            '필요 없는 것은 모두 흘려보내요'],
+    ['편안함이 온몸으로 번져요',             '이 고요함을 기억해요',                 '몸이 한결 가벼워져요'],
+    ['마지막 숨처럼, 소중하게',              '마음이 잔잔히 가라앉아요',             '고마운 마음으로 길게 내쉬어요'],
+  ];
+  // 처음 두 회차만 단계 이름 옆에 방법을 작게 덧붙임
+  const titleFor = (c, i) => c <= 2
+    ? `${PHASES[i].label} <span class="tag">· ${PHASES[i].tag}</span>`
+    : PHASES[i].label;
+
+  const CYCLE = PHASES.reduce((s, p) => s + p.dur, 0); // 19초 = 한 바퀴
+  const OFFSET = PHASES.map((_, i) => PHASES.slice(0, i).reduce((s, p) => s + p.dur, 0));
+
+  const $ = id => document.getElementById(id);
+  const body = document.body;
+  const orb = $('orb'), halo = $('halo'), aura1 = $('aura1'), aura2 = $('aura2');
+  const comet = $('comet'), head = $('head');
+  const readout = $('readout'), titleEl = $('title'), ticksEl = $('ticks'), cueEl = $('cue');
+  const toggleBtn = $('toggle'), resetBtn = $('reset');
+  const cyclesSel = $('cycles'), cycleInfo = $('cycleInfo');
+  const segs = document.querySelectorAll('.seg');
+
+  const R = 49, CIRC = 2 * Math.PI * R, GAP = 1.2;
+  segs.forEach((s, i) => {
+    const a0 = OFFSET[i] / CYCLE * 360 + GAP / 2;
+    const len = PHASES[i].dur / CYCLE * 360 - GAP;
+    s.style.strokeDasharray = `${len / 360 * CIRC} ${CIRC}`;
+    s.style.strokeDashoffset = `${-a0 / 360 * CIRC}`;
+  });
+
+  let mode = 'idle', running = false;
+  let phaseIdx = 0, phaseStart = 0, pausedAt = 0, phaseP = 0;
+  let cycle = 0, total = 4;
+  let chimeOn = false;
+  let target = MIN, a1 = MIN, a2 = MIN, lastFrame = performance.now();
+  let angle = 0, cometOn = 0, cometTarget = 0;
+
+  const ease = t => t * t * t * (t * (t * 6 - 15) + 10);
+
+  /* ----- 숨의 맥박 (초 막대) -----
+     막대 개수는 늘 같음(9개) → 단계가 바뀌어도 자리 변화 없음.
+     가운데가 가장 높은 정규분포 모양을 바탕으로, 1초에 한 번 물결이
+     가운데에서 바깥으로 퍼져 나가며 막대가 희미해졌다 또렷해짐.
+     단계 길이가 모두 정수 초라서 단계·회차가 넘어가도 박자가 끊기지 않음. */
+  let beatT = 0, dotN = 0, dotI = -1;
+  function setDots(n) {                      // 단계가 바뀌면 바로 새 자리 (첫 1초부터 보임)
+    ticksEl.innerHTML = '<i class="dot"></i>'.repeat(n);
+    dotN = n; dotI = -1;
+  }
+  function drawPulse() {
+    if (!dotN) return;
+    const i = Math.min(dotN - 1, Math.floor(beatT));
+    if (i === dotI) return;
+    // 앞의 점은 그대로 두면 스스로 흐려지며 사라짐 (여운이 다음 초와 살짝 겹침)
+    const dots = ticksEl.children;
+    if (dots[i]) requestAnimationFrame(() => dots[i].classList.add('on'));
+    dotI = i;
+  }
+
+  /* ----- 구체 안의 글을 천천히 바꿈 ----- */
+  let swapTimer = null;
+  function showText({ title, cue, idle }) {
+    clearTimeout(swapTimer);
+    if (!idle) readout.classList.remove('idle');
+    readout.classList.add('out');
+    swapTimer = setTimeout(() => {
+      if (idle) readout.classList.add('idle');
+      titleEl.innerHTML = title;
+      cueEl.textContent = cue;
+      readout.classList.remove('out');
+      readout.classList.add('pre');
+      void readout.offsetWidth;
+      requestAnimationFrame(() => readout.classList.remove('pre'));
+    }, 1000);
+  }
+
+  function updateCycleInfo() {
+    cycleInfo.textContent = total ? `${cycle} / ${total} 회` : `${cycle} 회`;
+  }
+  function mark(key) { segs.forEach(s => s.classList.toggle('active', s.dataset.seg === key)); }
+
+  function chime(freq) {
+    if (!chimeOn) return;
+    try {
+      const audio = getAudio(), t = audio.currentTime;
+      [1, 2].forEach((mult, i) => {
+        const osc = audio.createOscillator(), g = audio.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq * mult;
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(i ? 0.022 : 0.085, t + 0.5);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 3.8);
+        osc.connect(g).connect(audio.destination);
+        osc.start(t); osc.stop(t + 3.9);
+      });
+    } catch (e) {}
+  }
+
+  function enterPhase(i) {
+    phaseIdx = i;
+    const ph = PHASES[i];
+    body.dataset.phase = ph.key;
+    beatT = 0; setDots(ph.dur);
+    showText({ title: titleFor(cycle, i), cue: CUES[(cycle - 1) % CUES.length][i] });
+    mark(ph.key);
+    chime(ph.tone);
+  }
+
+  function startSession() {
+    Nature.start(); // 브라우저 정책상 첫 클릭 때 소리를 시작
+    total = +cyclesSel.value;
+    cycle = 0;
+    angle = 0;
+    updateCycleInfo();
+    mode = 'ready';
+    body.dataset.phase = 'ready';
+    beatT = 0; setDots(READY);
+    showText({ title: '준비 <span class="tag">· 혀끝은 윗니 뒤에</span>', cue: '눈은 구체에, 마음은 숨에 두어요' });
+    mark(null);
+    phaseStart = performance.now();
+    running = true;
+    cometTarget = 1;
+    toggleBtn.textContent = '일시정지';
+    cyclesSel.disabled = true;
+  }
+
+  function finish() {
+    mode = 'done';
+    running = false;
+    target = MIN;
+    cometTarget = 0;
+    body.dataset.phase = 'ready';
+    mark(null);
+    showText({ idle: true, title: `${cycle}번의 호흡을 마쳤어요`, cue: '생각이 가라앉은 이 자리를 잠시 느껴 보세요' });
+    toggleBtn.textContent = '다시 시작';
+    cyclesSel.disabled = false;
+    chime(262);
+  }
+
+  function reset() {
+    running = false;
+    mode = 'idle';
+    cycle = 0;
+    updateCycleInfo();
+    target = MIN;
+    cometTarget = 0;
+    body.dataset.phase = 'ready';
+    mark(null);
+    showText({ idle: true, title: '시작을 누르면 천천히 시작해요', cue: '잠시, 모든 일을 내려놓아도 괜찮아요' });
+    toggleBtn.textContent = '시작';
+    cyclesSel.disabled = false;
+  }
+
+  function toggle() {
+    if (mode === 'idle' || mode === 'done') { startSession(); return; }
+    const now = performance.now();
+    if (running) {
+      running = false;
+      pausedAt = now;
+      toggleBtn.textContent = '계속';
+      showText({ title: '잠시 멈춤', cue: '괜찮아요, 준비되면 다시 이어가요' });
+    } else {
+      phaseStart += now - pausedAt;
+      running = true;
+      toggleBtn.textContent = '일시정지';
+      if (mode === 'ready') showText({ title: '준비', cue: '눈은 구체에, 마음은 숨에 두어요' });
+      else showText({ title: titleFor(cycle, phaseIdx), cue: CUES[(cycle - 1) % CUES.length][phaseIdx] });
+    }
+  }
+
+  function update(now) {
+    if (mode === 'ready') {
+      const el = (now - phaseStart) / 1000;
+      if (el >= READY) {
+        phaseStart += READY * 1000;
+        mode = 'breath';
+        cycle = 1;
+        updateCycleInfo();
+        enterPhase(0);
+      } else {
+        target = MIN;
+        angle = 0;
+        beatT = el;
+        return;
+      }
+    }
+    if (mode !== 'breath') return;
+
+    let ph = PHASES[phaseIdx];
+    let el = (now - phaseStart) / 1000;
+    while (el >= ph.dur) {
+      phaseStart += ph.dur * 1000;
+      el -= ph.dur;
+      if (phaseIdx === PHASES.length - 1) {
+        if (total && cycle >= total) { angle = cycle * 360; finish(); return; }
+        cycle++;
+        updateCycleInfo();
+        enterPhase(0);
+      } else {
+        enterPhase(phaseIdx + 1);
+      }
+      ph = PHASES[phaseIdx];
+    }
+    const p = Math.min(1, el / ph.dur);
+    phaseP = p;
+    if (ph.key === 'inhale') target = MIN + (MAX - MIN) * ease(p);
+    else if (ph.key === 'hold') target = MAX + 0.012 * Math.sin(p * Math.PI);
+    else target = MAX - (MAX - MIN) * ease(p);
+
+    angle = ((cycle - 1) * CYCLE + OFFSET[phaseIdx] + el) / CYCLE * 360;
+    beatT = el;   // 단계 길이가 정수 초 → 박자가 이어짐
+  }
+
+  /* ----- 숨결의 선 -----
+     들이마실 때: 아주 낮고 느린 물결이 살며시 차오름
+     머물 때:    물결이 천천히 잦아들어 고요히 멈추고, 끝으로 갈수록 미세한 떨림
+     내쉴 때:    모았던 숨이 풀리듯 큰 파동으로 시작해 점점 잔잔해짐 */
+  const wave = $('wave'), wctx = wave.getContext('2d');
+  let wW = 0, wH = 0, wDpr = 1;
+  let wAmp = 1.5, wTrem = 0, wSpeed = 0.12, wGlow = 0.55, wPhase = 0, tPhase = 0;
+  function sizeWave() {
+    wDpr = Math.min(window.devicePixelRatio || 1, 2);
+    wW = innerWidth; wH = 240;
+    wave.width = Math.round(wW * wDpr);
+    wave.height = Math.round(wH * wDpr);
+  }
+  addEventListener('resize', sizeWave);
+  sizeWave();
+
+  function drawWave(dt) {
+    const key = mode === 'breath' ? PHASES[phaseIdx].key : 'calm';
+    const p = phaseP;
+    let ampT = 1.5, tremT = 0, speedT = 0.12, glowT = 0.55, ampTau = 1.8;
+    if (key === 'inhale') {
+      ampT = 1.5 + 2.5 * ease(p); speedT = 0.15; glowT = 0.6 + 0.15 * p; ampTau = 1.6;
+    } else if (key === 'hold') {
+      ampT = 0; speedT = 0.03; glowT = 0.78; ampTau = 2.2;
+      const strain = Math.max(0, (p - 0.45) / 0.55);
+      tremT = 1.3 * Math.pow(strain, 2.2);
+      glowT += 0.12 * strain;
+    } else if (key === 'exhale') {
+      ampT = 1.5 + 20 * Math.pow(1 - p, 1.7);
+      speedT = 0.13 + 0.22 * (1 - p);
+      glowT = 0.85 - 0.25 * p;
+      ampTau = ampT > wAmp ? 0.75 : 1.2;
+    }
+    if (mode === 'breath' && !running) { tremT = 0; ampT = Math.min(ampT, 1.5); speedT = 0.06; }
+
+    const k = tau => 1 - Math.exp(-dt / tau);
+    wAmp += (ampT - wAmp) * k(ampTau);
+    wTrem += (tremT - wTrem) * k(0.9);
+    wSpeed += (speedT - wSpeed) * k(1.6);
+    wGlow += (glowT - wGlow) * k(2);
+    wPhase += wSpeed * dt * Math.PI * 2;
+    tPhase += dt;
+
+    const c = wctx;
+    c.setTransform(wDpr, 0, 0, wDpr, 0, 0);
+    c.clearRect(0, 0, wW, wH);
+    const cy = wH / 2, cx = wW / 2;
+    const lambda = Math.max(320, wW * 0.34);
+    const grad = c.createLinearGradient(0, 0, wW, 0);
+    grad.addColorStop(0, 'rgba(255,255,255,0)');
+    grad.addColorStop(0.18, `rgba(255,255,255,${0.45 * wGlow})`);
+    grad.addColorStop(0.5, `rgba(255,255,255,${0.9 * wGlow})`);
+    grad.addColorStop(0.82, `rgba(255,255,255,${0.45 * wGlow})`);
+    grad.addColorStop(1, 'rgba(255,255,255,0)');
+
+    c.beginPath();
+    for (let x = 0; x <= wW; x += 3) {
+      const env = Math.pow(Math.sin(Math.PI * x / wW), 1.4);
+      const d = Math.abs(x - cx);
+      let y = wAmp * Math.sin(d / lambda * Math.PI * 2 - wPhase);
+      if (wTrem > 0.01) {
+        y += wTrem * (0.5 * Math.sin(x * 0.06 + tPhase * 19) +
+                      0.3 * Math.sin(x * 0.13 - tPhase * 27) +
+                      0.2 * Math.sin(x * 0.031 + tPhase * 13));
+      }
+      y *= env;
+      x === 0 ? c.moveTo(x, cy + y) : c.lineTo(x, cy + y);
+    }
+    c.strokeStyle = grad;
+    c.lineWidth = 1.3;
+    c.shadowColor = 'rgba(255, 250, 240, .7)';
+    c.shadowBlur = 6;
+    c.stroke();
+  }
+
+  function frame(now) {
+    const dt = Math.min(0.1, (now - lastFrame) / 1000);
+    lastFrame = now;
+    if (running) update(now);
+    drawPulse(dt);
+
+    a1 += (target - a1) * (1 - Math.exp(-dt / 0.8));
+    a2 += (target - a2) * (1 - Math.exp(-dt / 1.6));
+    cometOn += (cometTarget - cometOn) * (1 - Math.exp(-dt / 1.2));
+
+    orb.style.transform = `scale(${target})`;
+    halo.style.transform = `scale(${target * 1.06})`;
+    aura1.style.transform = `scale(${a1 * 1.12})`;
+    aura2.style.transform = `scale(${a2 * 1.1})`;
+
+    const a = `${angle % 360}deg`;
+    comet.style.setProperty('--a', a);
+    head.style.setProperty('--a', a);
+    comet.style.opacity = cometOn * (mode === 'ready' ? 0.35 : 1);
+    head.style.opacity = cometOn;
+
+    drawWave(dt);
+    requestAnimationFrame(frame);
+  }
+
+  /* ----- 패널 공통 ----- */
+  const panels = [];
+  function makePanel(btn, panel, onOpen) {
+    const set = open => {
+      panel.classList.toggle('open', open);
+      btn.setAttribute('aria-expanded', open);
+      if (open && onOpen) onOpen();
+    };
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const open = !panel.classList.contains('open');
+      panels.forEach(p => p(false));
+      set(open);
+    });
+    panel.addEventListener('click', e => e.stopPropagation());
+    panels.push(set);
+  }
+  document.addEventListener('click', () => panels.forEach(p => p(false)));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') panels.forEach(p => p(false)); });
+
+  /* ----- 자연의 소리 ----- */
+  const soundBtn = $('soundBtn'), volEl = $('vol'), chimeChip = $('chimeChip');
+  const soundLabel = () => {
+    const n = Nature.count();
+    soundBtn.textContent = n ? `자연의 소리 · ${n}` : '자연의 소리 꺼짐';
+  };
+  makePanel(soundBtn, $('soundPanel'));
+  document.querySelectorAll('.chip[data-layer]').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const on = chip.getAttribute('aria-pressed') !== 'true';
+      chip.setAttribute('aria-pressed', on);
+      Nature.setLayer(chip.dataset.layer, on);
+      soundLabel();
+    });
+  });
+  volEl.addEventListener('input', () => Nature.setVolume(volEl.value / 100));
+  chimeChip.addEventListener('click', () => {
+    chimeOn = !chimeOn;
+    chimeChip.setAttribute('aria-pressed', chimeOn);
+    chimeChip.textContent = chimeOn ? '켜짐' : '꺼짐';
+    if (chimeOn) chime(330);
+  });
+  soundLabel();
+
+  /* ----- 하늘 고르기 ----- */
+  const skyGrid = $('skyGrid');
+  let thumbsLoaded = false;
+  function renderSkies() {
+    skyGrid.innerHTML = Sky.list.map(s => `
+      <button class="sky-opt" data-id="${s.id}" aria-pressed="${s.id === Sky.current}">
+        <video muted playsinline preload="metadata" ${thumbsLoaded ? `src="${Sky.thumbOf(s)}"` : ''}></video>
+        <span>${s.name}</span>
+      </button>`).join('');
+    skyGrid.querySelectorAll('.sky-opt').forEach(b => {
+      const v = b.querySelector('video');
+      b.addEventListener('mouseenter', () => { v.play().catch(() => {}); });
+      b.addEventListener('mouseleave', () => { v.pause(); });
+      b.addEventListener('click', () => {
+        Sky.choose(b.dataset.id);
+        skyGrid.querySelectorAll('.sky-opt').forEach(x => x.setAttribute('aria-pressed', x === b));
+      });
+    });
+  }
+  makePanel($('skyBtn'), $('skyPanel'), () => {
+    if (!thumbsLoaded) { thumbsLoaded = true; renderSkies(); }
+  });
+  renderSkies();
+
+  /* ----- 블랙 모드 ----- */
+  const themeBtn = $('themeBtn');
+  function setMode(black) {
+    document.documentElement.dataset.mode = black ? 'black' : 'sky';
+    themeBtn.setAttribute('aria-pressed', black);
+    themeBtn.lastChild.textContent = black ? '하늘 모드' : '블랙 모드';
+    store.set('breath-mode', black ? 'black' : 'sky');
+    black ? Sky.pause() : Sky.resume();
+  }
+  themeBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    panels.forEach(p => p(false));
+    setMode(document.documentElement.dataset.mode !== 'black');
+  });
+  if (store.get('breath-mode') === 'black') setMode(true);
+
+  toggleBtn.addEventListener('click', toggle);
+  resetBtn.addEventListener('click', reset);
+  cyclesSel.addEventListener('change', () => { total = +cyclesSel.value; updateCycleInfo(); });
+  document.addEventListener('keydown', e => {
+    if (e.code === 'Space' && !['SELECT', 'BUTTON', 'INPUT'].includes(e.target.tagName)) {
+      e.preventDefault(); toggle();
+    }
+  });
+
+  reset();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
